@@ -21,6 +21,13 @@ esc() {
     esac
 }
 
+ismatch() {
+    case "$2" in
+        $1) return 0
+    esac
+    return 1
+}
+
 term_setup() {
     stty -icanon -echo
     esc screen_alt h
@@ -278,7 +285,8 @@ main() {
     y=1 y2=1
     redraw "$@"
 
-    while key=$(dd ibs=1 count=1 2>/dev/null); do
+    while ismatch 0 "${ret:=0}"; do
+        key=$(dd ibs=1 count=1 2>/dev/null) ret=$?
         case $key${esc:=0} in
             k?|A2)
                 esc=0
