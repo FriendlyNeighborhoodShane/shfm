@@ -36,6 +36,7 @@ q - quit
 - - go to last directory
 ~ - go home
 ! - spawn shell
+] - run command
 . - toggle hidden files
 ? - show help
 

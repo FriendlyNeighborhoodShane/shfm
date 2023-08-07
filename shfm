@@ -402,6 +402,14 @@ main() {
                 redraw=10
             ;;
 
+            \]?)
+                prompt "cmd: " r
+                SHFM_LEVEL=$((SHFM_LEVEL + 1))
+                cmd_run "${SHELL:=/bin/sh}" -c "$ans"
+                prompt "press any key to continue:" r
+                redraw=11
+            ;;
+
             \??)
                 set -- 'j - down' \
                        'k - up' \
@@ -415,6 +423,7 @@ main() {
                        '- - go to last directory' \
                        '~ - go home' \
                        '! - spawn shell' \
+                       '] - run command' \
                        '. - toggle hidden files' \
                        '? - show keybinds'
 
