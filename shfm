@@ -142,10 +142,6 @@ list_print() {
     end=$((bottom + 1))
     mid=$((bottom / 4 < 5 ? 1 : bottom / 4))
 
-    case $# in
-        1) [ -e "$1" ] || [ "$1" = 'no results' ] || set -- empty
-    esac
-
     case $hist in
         2) # redraw after cmd run
             shift "$((y > y2 ? y - y2 : 0))"
@@ -283,10 +279,14 @@ main() {
         # redraw is 10 for just redraw and 11 for rescan list
         if ismatch "1*" "${redraw:=11}"; then
             if ismatch 11 "$redraw"; then
-                case ${hidden:=1} in
-                    0) set -- .* ;;
-                    1) set -- *
-                esac
+                set -- *
+                [ -e "$1" ] || shift 1
+                if ismatch 0 "${hidden:=1}"; then
+                    set -- .[!.]* "$@"
+                    [ -e "$1" ] || shift 1
+                    set -- ..?* "$@"
+                    [ -e "$1" ] || shift 1
+                fi
                 y=1 y2=1 cur=$1
             fi
             redraw "$@"
