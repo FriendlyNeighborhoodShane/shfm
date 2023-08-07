@@ -31,6 +31,7 @@ h - go up level
 g - go to top
 G - go to bottom
 q - quit
+r - refresh
 : - cd to <input>
 / - search current directory <input>*
 - - go to last directory

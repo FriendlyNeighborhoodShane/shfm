@@ -345,6 +345,10 @@ main() {
                 redraw=10
             ;;
 
+            r?)
+                redraw=11
+            ;;
+
             .?)
                 case ${hidden:=1} in
                     1) hidden=0 ;;
@@ -418,6 +422,7 @@ main() {
                        'g - go to top' \
                        'G - go to bottom' \
                        'q - quit' \
+                       'r - refresh' \
                        ': - cd to <input>' \
                        '/ - search current directory <input>*' \
                        '- - go to last directory' \
