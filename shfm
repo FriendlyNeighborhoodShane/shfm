@@ -272,20 +272,27 @@ main() {
     esc_c=$(printf '\033')
     bs_char=$(printf '\177')
 
-    set -- *
-    cur=$1
-
     term_resize
     stty=$(stty -g)
     term_setup
 
     trap 'term_reset'  EXIT INT
-    trap 'term_resize; term_setup; y=1 y2=1; redraw "$@"' WINCH
-
-    y=1 y2=1
-    redraw "$@"
+    trap 'term_resize; term_setup; redraw=11' WINCH
 
     while ismatch 0 "${ret:=0}"; do
+        # redraw is 10 for just redraw and 11 for rescan list
+        if ismatch "1*" "${redraw:=11}"; then
+            if ismatch 11 "$redraw"; then
+                case ${hidden:=1} in
+                    0) set -- .* ;;
+                    1) set -- *
+                esac
+                y=1 y2=1 cur=$1
+            fi
+            redraw "$@"
+            redraw=0
+        fi
+
         key=$(dd ibs=1 count=1 2>/dev/null) ret=$?
         case $key${esc:=0} in
             k?|A2)
@@ -301,13 +308,11 @@ main() {
             l?|C2|"$esc") # ARROW RIGHT
                 esc=0
                 if [ -d "$cur" ] && cd -- "$cur" >/dev/null 2>&1; then
-                    set -- *
-                    y=1 y2=1 cur=$1 ltype=
-                    redraw "$@"
-
+                    ltype=
+                    redraw=11
                 elif [ -e "$cur" ]; then
                     cmd_run "${SHFM_OPENER:="${EDITOR:=vi}"}" "$cur"
-                    redraw "$@"
+                    redraw=10
                 fi
             ;;
 
@@ -320,9 +325,8 @@ main() {
                      *) ltype= ;;
                 esac
 
-                set -- *
-                y=1 y2=1 cur=$1 hist=1
-                redraw "$@"
+                hist=1
+                redraw=11
             ;;
 
             g?)
@@ -331,24 +335,23 @@ main() {
                 esac
 
                 y=1 y2=1 cur=$1
-                redraw "$@"
+                redraw=10
             ;;
 
             G?)
                 y=$#
                 y2=$(($# < bottom ? $# : bottom))
                 line_print "$y" "$@"
-                redraw "$@"
+                redraw=10
             ;;
 
             .?)
                 case ${hidden:=1} in
-                    1) hidden=0; set -- .* ;;
-                    0) hidden=1; set -- *
+                    1) hidden=0 ;;
+                    0) hidden=1
                 esac
 
-                y=1 y2=1 cur=$1
-                redraw "$@"
+                redraw=11
             ;;
 
             :?)
@@ -362,9 +365,7 @@ main() {
                 esac
 
                 cd -- "${ans:="$0"}" >/dev/null 2>&1|| continue
-                set -- *
-                y=1 y2=1 cur=$1
-                redraw "$@"
+                redraw=11
             ;;
 
             /?)
@@ -381,29 +382,24 @@ main() {
                 esac
 
                 y=1 y2=1 cur=$1 ltype="search $PWD/$ans*"
-                redraw "$@"
-                status_line "$#"
+                redraw=10
             ;;
 
             -?)
                 cd -- "$OLDPWD" >/dev/null 2>&1|| continue
-                set -- *
-                y=1 y2=1 cur=$1
-                redraw "$@"
+                redraw=11
             ;;
 
             \~?)
                 cd || continue
-                set -- *
-                y=1 y2=1 cur=$1
-                redraw "$@"
+                redraw=11
             ;;
 
             \!?)
                 export SHFM_LEVEL
                 SHFM_LEVEL=$((SHFM_LEVEL + 1))
                 cmd_run "${SHELL:=/bin/sh}"
-                redraw "$@"
+                redraw=10
             ;;
 
             \??)
@@ -423,8 +419,7 @@ main() {
                        '? - show keybinds'
 
                 y=1 y2=1 cur=$1 ltype=keybinds
-                redraw "$@"
-                status_line "$#"
+                redraw=10
             ;;
 
             q?) exit 0 ;;
