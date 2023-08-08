@@ -28,6 +28,7 @@ j - down
 k - up
 l - open file or directory
 h - go up level
+f - stat file
 g - go to top
 G - go to bottom
 q - quit

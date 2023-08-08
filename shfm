@@ -329,6 +329,12 @@ main() {
                 redraw=11
             ;;
 
+            f?)
+                cmd_run "${SHELL:=/bin/sh}" -c 'stat "$1"; printf "\n"; file -b "$1"' -- "$cur"
+                prompt "press any key to continue:" r
+                redraw=11
+            ;;
+
             g?)
                 case $y in
                     1) continue
@@ -419,6 +425,7 @@ main() {
                        'k - up' \
                        'l - open file or directory' \
                        'h - go up level' \
+                       'f - stat file' \
                        'g - go to top' \
                        'G - go to bottom' \
                        'q - quit' \
